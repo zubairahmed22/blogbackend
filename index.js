@@ -20,7 +20,7 @@ app.use((req, res, next) => {
     next()
   }) 
 
-app.use(cors({ credentials: true, origin:'http://localhost:3000'}))
+app.use(cors({ credentials: true, origin:'https://soft-gumption-4ae84e.netlify.app'}))
 app.use(express.json())
 app.use(cookieParser())
 
