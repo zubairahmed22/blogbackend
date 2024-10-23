@@ -15,6 +15,10 @@ dotenv.config();
 const fs = require('fs')
 const cookieParser = require('cookie-parser')
 app.use('/uploads', express.static(__dirname + '/uploads'));
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*")
+    next()
+  }) 
 
 app.use(cors({ credentials: true, origin:'http://localhost:3000'}))
 app.use(express.json())
