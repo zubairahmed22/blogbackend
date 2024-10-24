@@ -16,8 +16,13 @@ const fs = require('fs')
 const cookieParser = require('cookie-parser')
 app.use('/uploads', express.static(__dirname + '/uploads'));
 
+// origin:'https://soft-gumption-4ae84e.netlify.app',
+const corsOptions = {
+    origin:'https://soft-gumption-4ae84e.netlify.app',
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE"};
+    
 
-app.use(cors({ credentials: true, origin:'https://soft-gumption-4ae84e.netlify.app'}))
+app.use(cors({ credentials: true, corsOptions, origin:'http://localhost:3000'}))
 app.use(express.json())
 app.use(cookieParser())
 
