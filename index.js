@@ -18,7 +18,7 @@ app.use('/uploads', express.static(__dirname + '/uploads'));
 
 // origin:'https://soft-gumption-4ae84e.netlify.app',
 const corsOptions = {
-    // origin:'https://soft-gumption-4ae84e.netlify.app',
+    origin:'https://soft-gumption-4ae84e.netlify.app', 
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE"};
     
 
