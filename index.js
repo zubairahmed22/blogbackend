@@ -17,12 +17,13 @@ const cookieParser = require('cookie-parser')
 app.use('/uploads', express.static(__dirname + '/uploads'));
 
 // origin:'https://soft-gumption-4ae84e.netlify.app',
-const corsOptions = {
-    origin:'https://soft-gumption-4ae84e.netlify.app', 
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE"};
+
     
 
-app.use(cors({ credentials: true, corsOptions}))
+app.use(cors({
+    origin: ["https://soft-gumption-4ae84e.netlify.app"], // the link of my front-end app on Netlify
+    methods: ["GET", "POST"],
+    credentials: true}))
 app.use(express.json())
 app.use(cookieParser())
 
