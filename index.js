@@ -87,7 +87,7 @@ app.post('/api/logout',(req,res) =>{
     res.cookie('token','').json('OK')
 })
 
-app.post('/post', uploadMiddleware.single('file'), async(req,res) => {
+app.post('/api/post', uploadMiddleware.single('file'), async(req,res) => {
     // console.log(req.body)
    
     const {originalname, path} = req.file
