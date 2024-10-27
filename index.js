@@ -21,7 +21,7 @@ app.use('/uploads', express.static(__dirname + '/uploads'));
     
 
 app.use(cors({
-    origin: ["https://soft-gumption-4ae84e.netlify.app"], // the link of my front-end app on Netlify
+    origin: ["https://blogpost-frontend-eight.vercel.app"], // the link of my front-end app on Netlify
     methods: ["GET", "POST"],
     credentials: true}))
 app.use(express.json())
