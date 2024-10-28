@@ -7,7 +7,7 @@ const { default: mongoose } = require("mongoose")
 const User = require('./models/User')
 const Post = require('./models/Post')
 const multer = require('multer')
-const uploadMiddleware = multer({ dest: 'uploads/' });
+const uploadMiddleware = multer({ dest: 'temp/' });
 const dotenv = require("dotenv");
 
 dotenv.config();
