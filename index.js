@@ -7,14 +7,17 @@ const { default: mongoose } = require("mongoose")
 const User = require('./models/User')
 const Post = require('./models/Post')
 const multer = require('multer')
-const uploadMiddleware = multer({ dest: 'temp/' });
+
 const dotenv = require("dotenv");
+const uploadMiddleware = multer({ dest: '/tmp' });
 
 dotenv.config();
+const {S3Client, PutObjectCommand} = require('@aws-sdk/client-s3')
+
 
 const fs = require('fs')
 const cookieParser = require('cookie-parser')
-app.use('/temp', express.static(__dirname + '/temp'));
+
 
 // origin:'https://soft-gumption-4ae84e.netlify.app',
 
@@ -32,12 +35,37 @@ app.use(cookieParser())
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.SECRET;
 let dbConntection = process.env.DB_URL
-console.log(dbConntection)
+const bucket = "blogpost-web-app"
+
 mongoose.connect(dbConntection).then(() =>{
     console.log("DB Connected")
 }).catch((error) =>{
     console.log(error)
 })
+
+
+async function uploadToS3(path, originalFilename, mimemtype ) {
+    const client = new S3Client({
+        region: 'us-cast-1',
+        credentials:{
+          accessKey: process.env.S3_ACCESS_KEY,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY 
+        } 
+    })
+    const part = originalFilename.split('.');
+    const ext = part[part.length-1]
+    const newFilename = path+'.'+ext
+  const data =  await client.send(new PutObjectCommand({
+        Bucket: bucket,
+        body: fs.readFileSync(path),
+        Key: newFilename ,
+        ContentType: mimemtype,
+        ACL: 'public-read'
+    }))
+   
+    console.log(data)
+}
+
 
 app.post('/api/register',  async(req,res) =>{
 const {username, password} = req.body;
@@ -89,14 +117,11 @@ app.post('/api/logout',(req,res) =>{
     res.cookie('token','').json('OK')
 })
 
-app.post('/api/post', uploadMiddleware.single('file'), async(req,res) => {
+app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
     // console.log(req.body)
    
-    const {originalname, path} = req.file
-    const part = originalname.split('.');
-    const ext = part[part.length-1]
-    const newPath = path+'.'+ext
-    fs.renameSync(path, newPath );
+    const {originalname, path, mimemtype} = req.file
+     
    
 
  const {token} = req.cookies;
