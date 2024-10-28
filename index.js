@@ -14,7 +14,7 @@ dotenv.config();
 
 const fs = require('fs')
 const cookieParser = require('cookie-parser')
-app.use('/uploads', express.static(__dirname + '/uploads'));
+app.use('/temp', express.static(__dirname + '/temp'));
 
 // origin:'https://soft-gumption-4ae84e.netlify.app',
 
