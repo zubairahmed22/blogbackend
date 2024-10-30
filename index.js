@@ -27,7 +27,7 @@ const mime = require('mime-types');
     
 
 app.use(cors({
-    origin: ["http://localhost:3000"], // the link of my front-end app on Netlify
+    origin: ["https://blogpost-frontend-eight.vercel.app"], // the link of my front-end app on Netlify
     methods: ["GET", "POST"],
     credentials: true}))
 app.use(express.json())
