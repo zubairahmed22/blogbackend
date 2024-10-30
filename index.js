@@ -18,7 +18,7 @@ const { Upload } = require('@aws-sdk/lib-storage');
 
 const fs = require('fs')
 const cookieParser = require('cookie-parser');
-const { PassThrough } = require("stream");
+
 const mime = require('mime-types'); 
 
 
@@ -27,7 +27,7 @@ const mime = require('mime-types');
     
 
 app.use(cors({
-    origin: ["https://blogpost-frontend-eight.vercel.app"], // the link of my front-end app on Netlify
+    origin: ["http://localhost:3000"], // the link of my front-end app on Netlify
     methods: ["GET", "POST"],
     credentials: true}))
 app.use(express.json())
@@ -36,7 +36,8 @@ app.use(cookieParser())
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
 const salt = bcrypt.genSaltSync(10);
-const secret = process.env.SECRET;
+const secret = process.env.JWT_SECRET;
+console.log(secret)
 let dbConntection = process.env.DB_URL
 const bucket = "zubair-blogpost"
 
