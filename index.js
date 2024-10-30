@@ -13,14 +13,17 @@ const uploadMiddleware = multer({ dest: '/tmp' });
 
 dotenv.config();
 const {S3Client, PutObjectCommand} = require('@aws-sdk/client-s3')
+const { Upload } = require('@aws-sdk/lib-storage');
 
 
 const fs = require('fs')
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const { PassThrough } = require("stream");
+const mime = require('mime-types'); 
 
 
 // origin:'https://soft-gumption-4ae84e.netlify.app',
-
+// https://blogpost-frontend-eight.vercel.app
     
 
 app.use(cors({
@@ -31,11 +34,11 @@ app.use(express.json())
 app.use(cookieParser())
 
 
-// app.use('/uploads', express.static(__dirname + '/uploads'));
+app.use('/uploads', express.static(__dirname + '/uploads'));
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.SECRET;
 let dbConntection = process.env.DB_URL
-const bucket = "blogpost-web-app"
+const bucket = "zubair-blogpost"
 
 mongoose.connect(dbConntection).then(() =>{
     console.log("DB Connected")
@@ -44,26 +47,42 @@ mongoose.connect(dbConntection).then(() =>{
 })
 
 
-async function uploadToS3(path, originalFilename, mimemtype ) {
+async function uploadToS3(path, originalname, mimetype ) {
+   
     const client = new S3Client({
-        region: 'us-cast-1',
+        region: 'eu-north-1',
         credentials:{
           accessKeyId: process.env.S3_ACCESS_KEY,
           secretAccessKey: process.env.S3_SECRET_ACCESS_KEY 
         } 
     })
-    const part = originalFilename.split('.');
-    const ext = part[part.length-1]
-    const newFilename = path+'.'+ext
-  const data =  await client.send(new PutObjectCommand({
-        Bucket: bucket,
-        body: fs.readFileSync(path),
-        Key: newFilename ,
-        ContentType: mimemtype,
-        ACL: 'public-read'
-    }))
-   
-    console.log(data)
+  
+    const part = originalname.split('.');
+    const ext = part[part.length -1]
+    const newFilename = Date.now() + '.' + ext
+    
+const imageFileStream = fs.createReadStream(path);
+
+    const mimeType = mime.lookup(ext) || 'application/octet-stream'; 
+    console.log(mimeType)
+           
+    const upload = new Upload({
+        client,
+        params: {
+          Bucket: bucket,
+          Body: imageFileStream,
+          Key: newFilename,
+          ContentType: mimeType,
+          ACL: 'public-read',
+        },
+      });
+      
+      // Execute the upload
+      await upload.done();
+    
+        return `https://${bucket}.s3.amazonaws.com/${newFilename}`
+       
+      
 }
 
 
@@ -120,7 +139,12 @@ app.post('/api/logout',(req,res) =>{
 app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
     // console.log(req.body)
    
-    const {originalname, path, mimemtype} = req.file
+    const { path, originalname, mimetype} = req.file
+    
+    
+
+   const url = await uploadToS3( path, originalname, mimetype)
+  console.log(url)
      
    
 
@@ -132,9 +156,10 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
      title,
      summery,
      content,
-     cover: newPath,
+     cover: url,
      author:info.id,
     })
+    
     res.json(postDoc)
 
     
@@ -158,11 +183,8 @@ res.json(onePost)
 app.put('/api/post', uploadMiddleware.single('file'), async(req,res) => {
     let newPath = null
     if(req.file){
-        const {originalname, path} = req.file
-        const part = originalname.split('.');
-        const ext = part[part.length-1]
-         newPath = path+'.'+ext
-        fs.renameSync(path, newPath );
+        const {originalname, path, mimetype} = req.file
+       newPath = uploadToS3(path, originalname,mimetype)
     }
     
     const {token} = req.cookies
