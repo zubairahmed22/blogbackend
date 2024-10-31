@@ -116,7 +116,7 @@ app.post('/api/login', async(req,res) =>{
    const passOkdata =  bcrypt.compareSync(password, userDoc.password)
    
    if(passOkdata){
-   jwt.sign({username,id:userDoc._id}, secret, {}, (err,token) => {
+   jwt.sign({username,id:userDoc._id}, process.env.JWT_SECRET, {}, (err,token) => {
         
         if (err) throw err;
         res.cookie('token', token).json({
@@ -133,7 +133,7 @@ app.post('/api/login', async(req,res) =>{
 app.get('/api/profile',(req,res) =>{
  const {token} = req.cookies;
 
- jwt.verify(token, secret, {}, (err, info) => {
+ jwt.verify(token, process.env.JWT_SECRET, {}, (err, info) => {
   if(err) throw err
   res.json(info) 
  });
@@ -157,8 +157,8 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
    
 
  const {token} = req.cookies;
- console.log("checking token", )
- jwt.verify(token, secret, {}, async(err, info) => {
+ console.log("checking token", process.env.JWT_SECRET)
+ jwt.verify(token, process.env.JWT_SECRET, {}, async(err, info) => {
   if(err) throw err
   const {title, summery, content} = req.body
   mongoose.connect(dbConntection).then(() =>{
@@ -203,7 +203,7 @@ app.put('/api/post', uploadMiddleware.single('file'), async(req,res) => {
     
     const {token} = req.cookies
     console.log("checking token ",token)
-    jwt.verify(token, secret, {}, async(err, info) => {
+    jwt.verify(token, process.env.JWT_SECRET, {}, async(err, info) => {
         if(err) throw err
         const {title, summery, content, id} = req.body
         const postDoc = await Post.findById(id)
