@@ -2,7 +2,7 @@ const express = require("express")
 const app = express()
 const cors = require('cors')
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken')
 const { default: mongoose } = require("mongoose")
 const User = require('./models/User')
 const Post = require('./models/Post')
@@ -28,7 +28,7 @@ const mime = require('mime-types');
 
 app.use(cors({
     origin: ["https://blogpost-frontend-eight.vercel.app"], // the link of my front-end app on Netlify
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT"],
     credentials: true}))
 app.use(express.json())
 app.use(cookieParser())
@@ -37,7 +37,7 @@ app.use(cookieParser())
 app.use('/uploads', express.static(__dirname + '/uploads'));
 const salt = bcrypt.genSaltSync(10);
 const secret = process.env.JWT_SECRET;
-console.log(secret)
+
 let dbConntection = process.env.DB_URL
 const bucket = "zubair-blogpost"
 
@@ -88,6 +88,11 @@ const imageFileStream = fs.createReadStream(path);
 
 
 app.post('/api/register',  async(req,res) =>{
+    mongoose.connect(dbConntection).then(() =>{
+        console.log("DB Connected")
+    }).catch((error) =>{
+        console.log(error)
+    })
 const {username, password} = req.body;
 try {
     const userData = await  User.create({username, 
@@ -105,13 +110,18 @@ try {
 
 app.post('/api/login', async(req,res) =>{
    const {username, password} = req.body;
+   mongoose.connect(dbConntection).then(() =>{
+    console.log("DB Connected")
+}).catch((error) =>{
+    console.log(error)
+})
    
    const userDoc =  await User.findOne({username});
    const passOkdata =  bcrypt.compareSync(password, userDoc.password)
    
    if(passOkdata){
    jwt.sign({username,id:userDoc._id}, secret, {}, (err,token) => {
-        console.log(token)
+        
         if (err) throw err;
         res.cookie('token', token).json({
           id:userDoc._id,
@@ -126,6 +136,7 @@ app.post('/api/login', async(req,res) =>{
 
 app.get('/api/profile',(req,res) =>{
  const {token} = req.cookies;
+
  jwt.verify(token, secret, {}, (err, info) => {
   if(err) throw err
   res.json(info) 
@@ -145,14 +156,20 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
     
 
    const url = await uploadToS3( path, originalname, mimetype)
-  console.log(url)
+  
      
    
 
  const {token} = req.cookies;
+ console.log("checking token", )
  jwt.verify(token, secret, {}, async(err, info) => {
   if(err) throw err
   const {title, summery, content} = req.body
+  mongoose.connect(dbConntection).then(() =>{
+    console.log("DB Connected")
+}).catch((error) =>{
+    console.log(error)
+})
  const postDoc = await  Post.create({
      title,
      summery,
@@ -169,7 +186,11 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
  
 
 app.get('/api/post',async(req, res) =>{
-
+    mongoose.connect(dbConntection).then(() =>{
+        console.log("DB Connected")
+    }).catch((error) =>{
+        console.log(error)
+    })
     res.json(await Post.find()
     .populate('author',['username']))
     
@@ -189,6 +210,7 @@ app.put('/api/post', uploadMiddleware.single('file'), async(req,res) => {
     }
     
     const {token} = req.cookies
+    console.log("checking token ",token)
     jwt.verify(token, secret, {}, async(err, info) => {
         if(err) throw err
         const {title, summery, content, id} = req.body
@@ -198,6 +220,11 @@ app.put('/api/post', uploadMiddleware.single('file'), async(req,res) => {
          if(!isAuthor){
             return res.status(400).json('you are not the author')
          }
+         mongoose.connect(dbConntection).then(() =>{
+            console.log("DB Connected")
+        }).catch((error) =>{
+            console.log(error)
+        })
           await postDoc.updateOne({
             title,
             summery,
