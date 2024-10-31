@@ -110,11 +110,7 @@ try {
 
 app.post('/api/login', async(req,res) =>{
    const {username, password} = req.body;
-   mongoose.connect(dbConntection).then(() =>{
-    console.log("DB Connected")
-}).catch((error) =>{
-    console.log(error)
-})
+  
    
    const userDoc =  await User.findOne({username});
    const passOkdata =  bcrypt.compareSync(password, userDoc.password)
@@ -186,11 +182,7 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
  
 
 app.get('/api/post',async(req, res) =>{
-    mongoose.connect(dbConntection).then(() =>{
-        console.log("DB Connected")
-    }).catch((error) =>{
-        console.log(error)
-    })
+    
     res.json(await Post.find()
     .populate('author',['username']))
     
@@ -220,11 +212,7 @@ app.put('/api/post', uploadMiddleware.single('file'), async(req,res) => {
          if(!isAuthor){
             return res.status(400).json('you are not the author')
          }
-         mongoose.connect(dbConntection).then(() =>{
-            console.log("DB Connected")
-        }).catch((error) =>{
-            console.log(error)
-        })
+         
           await postDoc.updateOne({
             title,
             summery,
