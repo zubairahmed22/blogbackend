@@ -146,7 +146,11 @@ app.post('/api/logout',(req,res) =>{
 
 app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
     // console.log(req.body)
-   
+   console.log(req.files)
+   if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+}
+
     const { path, originalname, mimetype} = req.file
     
     
