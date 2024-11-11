@@ -122,10 +122,7 @@ app.post('/api/login', async(req,res) =>{
         res.cookie('token', token).json({
           id:userDoc._id,
           username,
-          
-            httpOnly: true,        // Prevents JavaScript access to the cookie (optional)
-            secure: true,          // Only sent over HTTPS
-            sameSite: 'none',      // Allows cross-site requests
+                // Allows cross-site requests
                                   // Cookie expiration (optional, here it's 1 day)
           
         });
@@ -169,10 +166,16 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
    
 
    const {token} = req.cookies;
- console.log("checking token", req.cookies)
+ console.log("checking token", token)
  jwt.verify(token, process.env.JWT_SECRET, {}, async(err, info) => {
   if(err) throw err
   const {title, summery, content} = req.body
+  console.log(info)
+  mongoose.connect(dbConntection).then(() =>{
+    console.log("DB Connected")
+}).catch((error) =>{
+    console.log(error)
+})
 
  const postDoc = await  Post.create({
      title,
@@ -190,6 +193,11 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
  
 
 app.get('/api/post',async(req, res) =>{
+    mongoose.connect(dbConntection).then(() =>{
+        console.log("DB Connected")
+    }).catch((error) =>{
+        console.log(error)
+    })
     
     res.json(await Post.find()
     .populate('author',['username']))
@@ -197,7 +205,12 @@ app.get('/api/post',async(req, res) =>{
 })
 app.get('/api/post/:id',async(req,res) =>{
     const {id} = req.params
- 
+    mongoose.connect(dbConntection).then(() =>{
+       
+    }).catch((error) =>{
+        console.log(error)
+    })
+    
 const onePost =  await Post.findById(id).populate('author',['username'])
 res.json(onePost)
 })
@@ -214,6 +227,15 @@ app.put('/api/post', uploadMiddleware.single('file'), async(req,res) => {
     jwt.verify(token, process.env.JWT_SECRET, {}, async(err, info) => {
         if(err) throw err
         const {title, summery, content, id} = req.body
+
+
+        mongoose.connect(dbConntection).then(() =>{
+          
+        }).catch((error) =>{
+            console.log(error)
+        })
+        
+
         const postDoc = await Post.findById(id)
         console.log(postDoc)
         const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id)
