@@ -32,7 +32,7 @@ app.use(cors({
     credentials: true}))
 app.use(express.json())
 app.use(cookieParser())
-app.set('trust proxy', 1)
+
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
 const salt = bcrypt.genSaltSync(10);
@@ -169,15 +169,11 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
    
 
    const {token} = req.cookies;
- console.log("checking token", process.env.JWT_SECRET)
+ console.log("checking token", req.cookies)
  jwt.verify(token, process.env.JWT_SECRET, {}, async(err, info) => {
   if(err) throw err
   const {title, summery, content} = req.body
-  mongoose.connect(dbConntection).then(() =>{
-    console.log("DB Connected")
-}).catch((error) =>{
-    console.log(error)
-})
+
  const postDoc = await  Post.create({
      title,
      summery,
