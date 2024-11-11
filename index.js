@@ -32,7 +32,7 @@ app.use(cors({
     credentials: true}))
 app.use(express.json())
 app.use(cookieParser())
-
+app.set('trust proxy', 1)
 
 app.use('/uploads', express.static(__dirname + '/uploads'));
 const salt = bcrypt.genSaltSync(10);
