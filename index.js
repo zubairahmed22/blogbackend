@@ -27,7 +27,7 @@ const mime = require('mime-types');
     
 
 app.use(cors({
-    origin: ["https://blogpost-frontend-eight.vercel.app"], // the link of my front-end app on Netlify
+    origin:  'https://blogpost-frontend-eight.vercel.app', // the link of my front-end app on Netlify
     methods: ["GET", "POST", "PUT"],
     credentials: true}))
 app.use(express.json())
@@ -122,6 +122,12 @@ app.post('/api/login', async(req,res) =>{
         res.cookie('token', token).json({
           id:userDoc._id,
           username,
+          
+            httpOnly: true,        // Prevents JavaScript access to the cookie (optional)
+            secure: true,          // Only sent over HTTPS
+            sameSite: 'none',      // Allows cross-site requests
+                                  // Cookie expiration (optional, here it's 1 day)
+          
         });
       });
    }else{
@@ -132,10 +138,12 @@ app.post('/api/login', async(req,res) =>{
 
 app.get('/api/profile',(req,res) =>{
  const {token} = req.cookies;
+ 
 
  jwt.verify(token, process.env.JWT_SECRET, {}, (err, info) => {
   if(err) throw err
   res.json(info) 
+  console.log(info)
  });
 
    
@@ -160,7 +168,7 @@ app.post('/api/post',  uploadMiddleware.single('file'), async(req,res) => {
      
    
 
- const {token} = req.cookies;
+   const {token} = req.cookies;
  console.log("checking token", process.env.JWT_SECRET)
  jwt.verify(token, process.env.JWT_SECRET, {}, async(err, info) => {
   if(err) throw err
